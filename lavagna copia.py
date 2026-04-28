@@ -5,8 +5,9 @@ import requests
 
 # --- CONFIGURAZIONE ---
 cartella_script = os.path.dirname(os.path.abspath(__file__))
+# Usiamo lo stesso nome file della sede di Castel Rozzone
 DB_PATH = os.path.join(cartella_script, 'Lista articoli.XLSX')
-# URL AGGIORNATO PER TREVIGLIO
+# URL AGGIORNATO PER TREVIGLIO (Quello che mi hai inviato prima)
 FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSd_5OZf6eRhPukufmAwqEYiKpOMUIAMgpX-nG2UJNDP9HLVNQ/formResponse"
 
 st.set_page_config(page_title="CRI Treviglio - Scarico", layout="wide")
@@ -16,6 +17,7 @@ st.title("🚑 Lavagna Digitale - CRI Treviglio")
 def carica_dati():
     if os.path.exists(DB_PATH):
         try:
+            # Saltiamo la prima riga perché il tuo Excel ha l'intestazione con la data
             df = pd.read_excel(DB_PATH, skiprows=1)
             df.columns = [str(c).strip() for c in df.columns]
             return df
@@ -47,7 +49,7 @@ if df_prodotti is not None:
                         st.write(" ")
                         if st.button("SCARICA ✅", key=f"btn_{codice_mambu}", use_container_width=True):
                             
-                            # ID CAMPI (Verificati dal link inviato)
+                            # ID CAMPI (Verificati per il modulo di Treviglio)
                             payload = {
                                 "entry.1921919747": nome_articolo,   # ARTICOLO
                                 "entry.1949015185": codice_mambu,    # CODICE
@@ -55,7 +57,7 @@ if df_prodotti is not None:
                             }
                             
                             try:
-                                # Invio silente
+                                # Invio al Google Form di Treviglio
                                 r = requests.post(FORM_URL, data=payload)
                                 if r.status_code == 200:
                                     st.balloons()
@@ -67,4 +69,4 @@ if df_prodotti is not None:
         else:
             st.warning("Nessun articolo trovato.")
 else:
-    st.error("File Excel non trovato!")
+    st.error("File Excel non trovato! Assicurati che il file caricato si chiami 'Lista articoli.XLSX'")
